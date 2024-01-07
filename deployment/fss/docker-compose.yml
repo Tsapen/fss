@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  fss:
+    build:
+      dockerfile: deployment/server/Dockerfile
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FSS_SERVER_CONFIG=/configs/fss_config.json
+      - FSS_MIGRATIONS_PATH=/migrations/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  db:
+    image: postgres:14-alpine
+    container_name: fss_postgres_1
+    command: postgres -c 'max_connections=500'
+    environment:
+      POSTGRES_DB: fss
+      POSTGRES_USER: fss
+      POSTGRES_PASSWORD: fss_password
+      PGDATA: /data
+    networks:
+      - backend
+    volumes:
+      - postgres_data:/data
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:

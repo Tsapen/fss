@@ -1,0 +1,16 @@
+FROM golang:latest
+
+ARG FSS_ROOT_DIR
+ARG FSS_SERVER_CONFIG
+
+ENV FSS_ROOT_DIR=/app
+ENV FSS_SERVER_CONFIG=${FSS_SERVER_CONFIG}
+ENV FSS_MIGRATIONS_PATH=${FSS_MIGRATIONS_PATH}
+
+WORKDIR /app
+
+COPY . .
+
+RUN go build -o server ./cmd/fss/main.go
+
+CMD ["./server"]
