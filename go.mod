@@ -3,6 +3,7 @@ module github.com/Tsapen/fss
 go 1.21.4
 
 require (
+	github.com/Tsapen/fss/pkg/client v0.0.0-00010101000000-000000000000
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/google/uuid v1.5.0
@@ -24,3 +25,5 @@ require (
 	golang.org/x/sys v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/Tsapen/fss/pkg/client => ./pkg/client

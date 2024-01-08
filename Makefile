@@ -14,10 +14,10 @@ test:
 	docker-compose -f $(FSS_ROOT_DIR)/deployment/test/docker-compose.yml down --remove-orphans
 	docker-compose -f $(FSS_ROOT_DIR)/deployment/test/docker-compose.yml up -d --build test-fss
 
-run-server:
+run:
 	rm -rf $(FSS_ROOT_DIR)/socket
-	docker-compose -f $(FSS_ROOT_DIR)/deployment/server/docker-compose.yml down --remove-orphans
-	docker-compose -f $(FSS_ROOT_DIR)/deployment/server/docker-compose.yml up --build fss --detach
+	docker-compose -f $(FSS_ROOT_DIR)/deployment/fss/docker-compose.yml down --remove-orphans
+	docker-compose -f $(FSS_ROOT_DIR)/deployment/fss/docker-compose.yml up --build fss --detach
 
-stop-server:
-	docker-compose -f $(FSS_ROOT_DIR)/deployment/server/docker-compose.yml down -v --remove-orphans
+stop:
+	docker-compose -f $(FSS_ROOT_DIR)/deployment/fss/docker-compose.yml down -v --remove-orphans

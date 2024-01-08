@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	constraintViolationCode = "23503"
+	constraintViolationCode = "23505"
 )
 
 // Config contains settings for db.
@@ -78,7 +78,7 @@ func (s *DB) CreateFile(ctx context.Context, filename string) (int64, error) {
 	err := s.QueryRowContext(ctx, query, filename).Scan(&lastServerID)
 	pqErr := new(pq.Error)
 	if ok := errors.As(err, &pqErr); ok && pqErr.Code == constraintViolationCode {
-		return 0, fss.NewConflictError("insert book: %w", err)
+		return 0, fss.NewConflictError("file exists: %w", err)
 	}
 	if err != nil {
 		return 0, fss.NewInternalError("insert file: %w", err)

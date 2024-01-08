@@ -13,5 +13,10 @@ func TestFSS(t *testing.T) {
 		t.Fatalf("read client configs: %v\n", err)
 	}
 
-	fsstest.TestFSS(t, clientCfg.Address)
+	fssCfg, err := config.GetForFSS()
+	if err != nil {
+		t.Fatalf("read client configs: %v\n", err)
+	}
+
+	fsstest.TestFSS(t, clientCfg.Address, fssCfg)
 }

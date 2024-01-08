@@ -25,7 +25,7 @@ func main() {
 		log.Fatal().Err(err).Msg("apply migrations")
 	}
 
-	dmService := dm.New(db)
+	dmService := dm.New(db, cfg.Timeout)
 
 	httpService, err := fsshttp.NewServer(fsshttp.Config(*cfg.HTTPCfg), cfg.MaxFragmentSize, dmService)
 	if err != nil {

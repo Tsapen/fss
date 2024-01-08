@@ -3,7 +3,7 @@ version: '3'
 services:
   fss:
     build:
-      dockerfile: deployment/server/Dockerfile
+      dockerfile: deployment/fss/Dockerfile
       context: ../../
     environment:
       - FSS_ROOT_DIR=/app

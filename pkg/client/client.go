@@ -8,8 +8,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-
-	"github.com/Tsapen/fss/internal/fss"
 )
 
 // Config contains data for constructing client.
@@ -44,9 +42,7 @@ func (c *Client) SaveFile(ctx context.Context, savingFileName, filePath string) 
 		return fmt.Errorf("failed to open local file: %w", err)
 	}
 
-	defer func() {
-		err = fss.HandleErrPair(file.Close(), err)
-	}()
+	defer file.Close()
 
 	uri, err := withFileName(c.address, savingFileName)
 	if err != nil {
@@ -58,9 +54,7 @@ func (c *Client) SaveFile(ctx context.Context, savingFileName, filePath string) 
 		return fmt.Errorf("do request: %w", err)
 	}
 
-	defer func() {
-		err = fss.HandleErrPair(resp.Body.Close(), err)
-	}()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("get error http status: %d", resp.StatusCode)
@@ -75,9 +69,7 @@ func (c *Client) GetFile(ctx context.Context, fileName, savingFilePath string) (
 		return fmt.Errorf("failed to create local file: %v", err)
 	}
 
-	defer func() {
-		err = fss.HandleErrPair(file.Close(), err)
-	}()
+	defer file.Close()
 
 	uri, err := withFileName(c.address, fileName)
 	if err != nil {
@@ -89,9 +81,7 @@ func (c *Client) GetFile(ctx context.Context, fileName, savingFilePath string) (
 		return fmt.Errorf("do request: %w", err)
 	}
 
-	defer func() {
-		err = fss.HandleErrPair(resp.Body.Close(), err)
-	}()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("get error http status: %d", resp.StatusCode)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
@@ -26,11 +27,13 @@ type Storage interface {
 
 type Service struct {
 	storage Storage
+	timeout time.Duration
 }
 
-func New(storage Storage) *Service {
+func New(storage Storage, timeout time.Duration) *Service {
 	return &Service{
 		storage: storage,
+		timeout: timeout,
 	}
 }
 
@@ -38,6 +41,10 @@ func (s *Service) Metadata(ctx context.Context, filename string) (*Metadata, err
 	f, err := s.storage.File(ctx, filename)
 	if err != nil {
 		return nil, fmt.Errorf("get file: %w", err)
+	}
+
+	if f.Fragments == nil {
+		return nil, fmt.Errorf("file is not committed")
 	}
 
 	serverURLs, err := s.orderedServerURLs(ctx, f.Name, f.LastServerID)
@@ -53,16 +60,37 @@ func (s *Service) Metadata(ctx context.Context, filename string) (*Metadata, err
 
 func (s *Service) StartSaving(ctx context.Context, filename string) ([]string, error) {
 	lastServerID, err := s.storage.CreateFile(ctx, filename)
+	if errors.As(err, &fss.ConflictError{}) {
+		if err := s.deleteFile(ctx, filename); err != nil {
+			return nil, fmt.Errorf("delete file: %w", err)
+		}
+
+		lastServerID, err = s.storage.CreateFile(ctx, filename)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("create file metadata: %w", err)
 	}
 
 	serverURLS, err := s.orderedServerURLs(ctx, filename, lastServerID)
 	if err != nil {
-		return nil, fmt.Errorf("create file metadata: %w", err)
+		return nil, fmt.Errorf("get ordered servers list: %w", err)
 	}
 
 	return serverURLS, nil
+}
+
+func (s *Service) deleteFile(ctx context.Context, filename string) error {
+	f, err := s.storage.File(ctx, filename)
+	if err != nil {
+		return fmt.Errorf("get metadata: %w", err)
+	}
+
+	if f.Fragments == nil && f.LastCommittedAt != nil && time.Since(*f.LastCommittedAt) > 2*s.timeout {
+		return s.storage.DeleteFile(ctx, filename)
+	}
+
+	return nil
 }
 
 func (s *Service) RollbackFile(ctx context.Context, filename string) error {

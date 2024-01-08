@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Tsapen/fss/internal/config"
+	"github.com/Tsapen/fss/internal/postgres"
 	"github.com/Tsapen/fss/pkg/client"
 )
 
@@ -18,11 +20,16 @@ type tc struct {
 }
 
 // TestFSS does integration testing.
-func TestFSS(t *testing.T, addr string) {
+func TestFSS(t *testing.T, addr string, fssConfig *config.FSSConfig) {
 	ctx := context.Background()
 
-	s := newStorage(t, addr)
-	s.waitRunning(t)
+	db, err := postgres.New(postgres.Config(*fssConfig.DB))
+	if err != nil {
+		t.Fatalf("open db conn: %v\n", err)
+	}
+
+	d := newTestData(t, addr, db)
+	d.waitRunning(t)
 
 	client, err := client.New(client.Config{
 		Address: addr,
@@ -30,10 +37,15 @@ func TestFSS(t *testing.T, addr string) {
 	if err != nil {
 		t.Fatalf("create client: %v\n", err)
 	}
+
 	testcases := []tc{
-		{name: "test 6 servers", testFunc: s.test6Servers},
-		{name: "test 7 servers", testFunc: s.test7Servers},
-		{name: "test 8 servers", testFunc: s.test8Servers},
+		{name: "test 6 servers", testFunc: d.test6Servers},
+		{name: "test 7 servers", testFunc: d.test7Servers},
+		{name: "test 8 servers", testFunc: d.test8Servers},
+		{name: "test repeated save", testFunc: d.testRepeatedSave},
+
+		{name: "test get file errors", testFunc: d.testGetFileErrors},
+		{name: "test save file errors", testFunc: d.testSaveFileErrors},
 	}
 
 	for _, testcase := range testcases {
@@ -47,7 +59,7 @@ type addServerRequest struct {
 	ServerURL string `json:"server_url"`
 }
 
-func (s *storage) waitRunning(t *testing.T) {
+func (s *testData) waitRunning(t *testing.T) {
 	const checkNum = 10
 	const maxDelay = 100 * time.Millisecond
 
@@ -62,7 +74,7 @@ func (s *storage) waitRunning(t *testing.T) {
 	t.Fatalf("service could not start")
 }
 
-func (s *storage) addServer(num int) error {
+func (s *testData) addServer(num int) error {
 	client := &http.Client{}
 
 	body := new(bytes.Buffer)

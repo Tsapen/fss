@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 
 	"github.com/caarlos0/env/v9"
 
@@ -32,8 +33,9 @@ type (
 		HTTPCfg *HTTPCfg `json:"http"`
 		DB      *DBCfg   `json:"db"`
 
-		MaxFragmentSize int64  `json:"max_fragment_size"`
-		MigrationsPath  string `json:"-"`
+		MaxFragmentSize int64         `json:"max_fragment_size"`
+		Timeout         time.Duration `json:"-"`
+		MigrationsPath  string        `json:"-"`
 	}
 
 	FSConfig struct {
@@ -74,6 +76,29 @@ func GetForFSS() (*FSSConfig, error) {
 	cfg.MigrationsPath = path.Join(envs.RootDir, envs.MigrationsPath)
 
 	return cfg, nil
+}
+
+func (c *FSSConfig) UnmarshalJSON(data []byte) error {
+	type Alias FSSConfig
+	aux := &struct {
+		Timeout string `json:"fs_timeout"`
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return fmt.Errorf("parse config: %w", err)
+	}
+
+	duration, err := time.ParseDuration(aux.Timeout)
+	if err != nil {
+		return fmt.Errorf("parse timeout: %w", err)
+	}
+
+	c.Timeout = duration
+
+	return nil
 }
 
 func GetForFS() (*FSConfig, error) {

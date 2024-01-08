@@ -9,5 +9,6 @@
         "virtual_host": "fss_test",
         "host": "test-postgres"
     },
-    "max_fragment_size": 1024
+    "max_fragment_size": 1024,
+    "fs_timeout": "5s"
 }
