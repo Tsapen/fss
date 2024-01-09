@@ -1,0 +1,14 @@
+{
+    "http": {
+        "address": "0.0.0.0:8080"
+    },
+    "db": {
+        "host": "db",
+        "username": "fss",
+        "password": "fss_password",
+        "port": "5432",
+        "virtual_host": "fss"
+    },
+    "max_fragment_size": 1024,
+    "fs_timeout": "5s"
+}

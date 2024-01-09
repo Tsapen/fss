@@ -1,0 +1,129 @@
+version: '3'
+
+networks:
+  fss-test-network:
+
+services:
+  test-postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: fss_test
+      POSTGRES_USER: fss_test
+      POSTGRES_PASSWORD: fss_test_password
+    networks:
+      - fss-test-network
+
+  test-fss-instance:
+    build:
+      dockerfile: deployment/test/Dockerfile
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FSS_CONFIG=/configs/test_fss_config.json
+      - FSS_CLIENT_CONFIG=/configs/test_client_config.json
+      - FSS_MIGRATIONS_PATH=/migrations/test/
+    networks:
+      - fss-test-network
+    depends_on:
+      - test-postgres
+      - file-server-1
+      - file-server-2
+      - file-server-3
+      - file-server-4
+      - file-server-5
+      - file-server-6
+      - file-server-7
+      - file-server-8
+
+  test-fss:
+    build:
+      dockerfile: deployment/test/Dockerfile.test
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FSS_CONFIG=/configs/test_fss_config.json
+      - FSS_CLIENT_CONFIG=/configs/test_client_config.json
+    networks:
+      - fss-test-network
+    depends_on:
+      - test-fss-instance
+
+  file-server-1:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-2:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-3:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-4:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-5:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-6:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-7:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
+
+  file-server-8:
+    build:
+      dockerfile: deployment/test/Dockerfile.fs
+      context: ../../
+    environment:
+      - FSS_ROOT_DIR=/app
+      - FS_CONFIG=/configs/test_fs_config.json
+    networks:
+      - fss-test-network
